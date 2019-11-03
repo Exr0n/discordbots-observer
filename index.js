@@ -42,6 +42,7 @@ client.on('message', msg => {
   {
       msg.channel.send(`Logs for ${msg.content.substr(4)}:`, { files: ["./logs/" + msg.guild.id + "/" + msg.content.substring(6, msg.content.length-1) + ".txt"] });
   }
+  if (msg.content == 'help') msg.reply("https://github.com/Exr0n/discordbots-observer");
 });
 
 client.login(require("./secrets/bot.json").token);
