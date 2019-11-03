@@ -1,0 +1,22 @@
+{
+  "name": "discordbots-observer",
+  "version": "1.0.0",
+  "description": "A discord bot to observe things",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Exr0n/discordbots-observer.git"
+  },
+  "author": "Exr0n",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Exr0n/discordbots-observer/issues"
+  },
+  "homepage": "https://github.com/Exr0n/discordbots-observer#readme",
+  "dependencies": {
+    "discord.js": "^11.5.1"
+  }
+}
