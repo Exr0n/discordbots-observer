@@ -14,7 +14,7 @@ if (!fs.existsSync("./logs")) {
     fs.mkdirSync("./logs");
 }
 
-async function log (msg)
+async function log (msg, type)
 {
     console.log("log called");
     let dir = "./logs/" + msg.guild.id;
@@ -29,12 +29,12 @@ async function log (msg)
     {
         streams[msg.guild.id][msg.channel.id] = fs.createWriteStream(dir+"/"+msg.channel.id+".txt", { flags: "a"});
     }
-    let text = `${Date().padStart(100)}, ${msg.author.tag.padStart(40)}, "${msg.content}"`;
+    let text = `${Date().padStart(100)}, ${msg.id.padStart(20)}, ${type.padStart(10)}, ${msg.author.tag.padStart(40)}, ${msg.content.replace(/\\/g, '\\\\').replace(/\,/g, '\\,')}`;
     streams[msg.guild.id][msg.channel.id].write(text+'\n');
 }
 
 client.on('message', msg => {
-    log(msg);
+    log(msg, 'create');
 //msg.reply("pong");
 	console.log(msg.content);
   if (!(msg.content.startsWith(`<@${client.user.id}>`) || msg.content.startsWith(`<@!${client.user.id}>`)) || msg.author.bot) return;
@@ -47,6 +47,10 @@ client.on('message', msg => {
   	} else { msg.reply("you don't have admin, sucks!"); }
   }
   if (msg.content == 'help') msg.reply("https://github.com/Exr0n/discordbots-observer");
+});
+
+client.on('messageUpdate', (src, dst) => {
+	log(dst, 'edit');
 });
 
 client.login(require("./secrets/bot.json").token);
