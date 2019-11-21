@@ -29,18 +29,22 @@ async function log (msg)
     {
         streams[msg.guild.id][msg.channel.id] = fs.createWriteStream(dir+"/"+msg.channel.id+".txt", { flags: "a"});
     }
-    let text = `${Date().padStart(100)}, ${msg.author.tag.padStart(40)}, ${msg.content}`;
+    let text = `${Date().padStart(100)}, ${msg.author.tag.padStart(40)}, "${msg.content}"`;
     streams[msg.guild.id][msg.channel.id].write(text+'\n');
 }
 
 client.on('message', msg => {
     log(msg);
-  if (!msg.content.startsWith(`<@${client.user.id}>`) || msg.author.bot) return;
-  msg.content = msg.content.substring(client.user.id.length + 3).trim();
+//msg.reply("pong");
+	console.log(msg.content);
+  if (!(msg.content.startsWith(`<@${client.user.id}>`) || msg.content.startsWith(`<@!${client.user.id}>`)) || msg.author.bot) return;
+  msg.content = msg.content.substring(msg.content.search('>')+1).trim();
   console.log(msg.content);
   if (/^get <#.+>$/.test(msg.content))
   {
-      msg.channel.send(`Logs for ${msg.content.substr(4)}:`, { files: ["./logs/" + msg.guild.id + "/" + msg.content.substring(6, msg.content.length-1) + ".txt"] });
+	  if (msg.member.permissions.has('ADMINISTRATOR')) {
+      		msg.author.send(`Logs for ${msg.content.substr(4)} in ${msg.guild.name}:`, { files: ["./logs/" + msg.guild.id + "/" + msg.content.substring(6, msg.content.length-1) + ".txt"] });
+  	} else { msg.reply("you don't have admin, sucks!"); }
   }
   if (msg.content == 'help') msg.reply("https://github.com/Exr0n/discordbots-observer");
 });
