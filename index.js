@@ -6,8 +6,8 @@ const client = new Discord.Client();
 var streams = {};
 
 client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-  client.user.setActivity('you', { type: 'WATCHING' })
+    console.log(`Logged in as ${client.user.tag}!`);
+    client.user.setActivity('you', { type: 'WATCHING' })
 });
 
 if (!fs.existsSync("./logs")) {
@@ -16,6 +16,8 @@ if (!fs.existsSync("./logs")) {
 
 async function log (msg, type)
 {
+	
+    if (! type) throw new Error("No type specified!");
     //console.log("log called");
     let dir = "./logs/" + msg.guild.id;
     if (!fs.existsSync(dir)){
@@ -33,19 +35,25 @@ async function log (msg, type)
     streams[msg.guild.id][msg.channel.id].write(text+'\n');
 }
 
+async function log_if_guild(msg, type) {
+	if (! msg.guild) return; // only logs if it's from a guild
+	log(msg, type).catch(console.error);
+}
+
 client.on('message', msg => {
-    log(msg, 'create');
+  log_if_guild(msg, 'create'); // only log messages from servers
 //msg.reply("pong");
 //	console.log(msg.content);
   if (!(msg.content.startsWith(`<@${client.user.id}>`) || msg.content.startsWith(`<@!${client.user.id}>`)) || msg.author.bot) return;
   msg.content = msg.content.substring(msg.content.search('>')+1).trim();
-  console.log(msg.content);
+  //console.log(msg.content);
   if (/^get <#.+>$/.test(msg.content))
   {
 	  if (msg.member.permissions.has('ADMINISTRATOR')) {
       		msg.author.send(`Logs for ${msg.content.substr(4)} in ${msg.guild.name} (https:/\/discordapp.com/channels/${msg.guild.id}/${msg.channel.id}/${msg.id}:`,
-			{ files: ["./logs/" + msg.guild.id + "/" + msg.content.substring(6, msg.content.length-1) + ".txt"] });
-  	} else { msg.reply("you don't have admin, sucks!"); }
+			{ files: ["./logs/" + msg.guild.id + "/" + msg.content.substring(6, msg.content.length-1) + ".txt"] })
+            .catch(console.error);
+  	} else { msg.reply("you don't have admin, sucks!").catch(console.error); }
   }
   if (msg.content == 'help') msg.reply("https://github.com/Exr0n/discordbots-observer");
   if (msg.content == 'ping') {
@@ -58,12 +66,16 @@ client.on('message', msg => {
   }
 });
 
+client.on('messageReactionAdd', (mR, u) => {
+	log_if_guild(Object.assign(mR.message, {author: u, content: mR.emoji.toString()}), 'react');
+});
+
 client.on('messageUpdate', (src, dst) => {
-	log(dst, 'edit');
+	log_if_guild(dst, 'edit');
 });
 
 client.on('messageDelete', (msg) => {
-	log(msg, 'delete');
+	log_if_guild(msg, 'delete');
 });
 
 client.on('disconnect', () => {
