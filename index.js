@@ -16,7 +16,7 @@ if (!fs.existsSync("./logs")) {
 
 async function log (msg, type)
 {
-    console.log("log called");
+    //console.log("log called");
     let dir = "./logs/" + msg.guild.id;
     if (!fs.existsSync(dir)){
         fs.mkdirSync(dir);
@@ -36,7 +36,7 @@ async function log (msg, type)
 client.on('message', msg => {
     log(msg, 'create');
 //msg.reply("pong");
-	console.log(msg.content);
+//	console.log(msg.content);
   if (!(msg.content.startsWith(`<@${client.user.id}>`) || msg.content.startsWith(`<@!${client.user.id}>`)) || msg.author.bot) return;
   msg.content = msg.content.substring(msg.content.search('>')+1).trim();
   console.log(msg.content);
@@ -48,10 +48,30 @@ client.on('message', msg => {
   	} else { msg.reply("you don't have admin, sucks!"); }
   }
   if (msg.content == 'help') msg.reply("https://github.com/Exr0n/discordbots-observer");
+  if (msg.content == 'ping') {
+	  msg.reply("pong...")
+	  .then(rep => {
+		  let ping = rep.createdTimestamp-msg.createdTimestamp;
+		  rep.edit(`<@${msg.author.id}> pong: +` + ping.toString() + "ms roundtrip.");
+	  })
+	  .catch(console.error);
+  }
 });
 
 client.on('messageUpdate', (src, dst) => {
 	log(dst, 'edit');
 });
 
-client.login(require("./secrets/bot.json").token);
+client.on('messageDelete', (msg) => {
+	log(msg, 'delete');
+});
+
+client.on('disconnect', () => {
+	login();
+});
+
+function login () {
+	client.login(require("./secrets/bot.json").token);
+}
+
+login();
